@@ -1,0 +1,5 @@
+1、函数指针:Function
+2、USERARG_STRING_TYPE+USERARG_ARRAY_TYPE: Array类型->约定写法：前面是类型STRING，后面是ARRAY类型，构成一个数组STRING_ARRAY类型
+3、注册USERSERVICE方法:USERSERVICE_register_method(userservice名，函数指针，参数列表...(多个值))；
+4、tcSession会话:tcSession.getUserService().call("userservice名",input参数列表);
+5、TCComponent相当于C里面的tag_t数组
