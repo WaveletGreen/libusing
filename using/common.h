@@ -1,6 +1,3 @@
-#pragma once
-#include <tc/tc.h>
-#include <tccore/custom.h>
-#include <server_exits/user_server_exits.h>
-
-
+#include "Form.h"
+void ECHO(char *format, ...);
+int getBomView(tag_t rev_tag, char* viewtype, tag_t *bomView, tag_t *bomBVR, int debug);

@@ -43,7 +43,7 @@ extern "C" {
 
 
 	//user service 
-	int itk_set_bypass(void *retValType);
+	//int itk_set_bypass(void *retValType);
 
 #ifdef __cplusplus
 }

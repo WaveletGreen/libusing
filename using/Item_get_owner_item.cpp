@@ -38,19 +38,19 @@ int GetUserItems(EPM_rule_message_t msg) {
 	return ITK_ok;
 }
 
-int set_prop_msg(METHOD_message_t* msg, va_list args)
-{
-	int ifail = ITK_ok, i = 0, j = 0, form_count = 0;
-	tag_t item_tag = NULLTAG, rev = NULLTAG, master_form_rel_type = NULLTAG,
-		master_form = NULLTAG, *form_list = NULL;
-	char obj_type[WSO_name_size_c + 1] = "", *value = NULL;
-
-
-	master_form = msg->object;
-	CALL(WSOM_ask_object_type(master_form, obj_type));
-	printf("=============type is %s\n", obj_type);
-	CALL(AOM_ask_value_string(master_form, "user_data_1", &value));
-	printf("ask property =%s!\n", value);
-
-	return ITK_ok;
-}
+//int set_prop_msg(METHOD_message_t* msg, va_list args)
+//{
+//	int ifail = ITK_ok, i = 0, j = 0, form_count = 0;
+//	tag_t item_tag = NULLTAG, rev = NULLTAG, master_form_rel_type = NULLTAG,
+//		master_form = NULLTAG, *form_list = NULL;
+//	char obj_type[WSO_name_size_c + 1] = "", *value = NULL;
+//
+//
+//	master_form = msg->object;
+//	CALL(WSOM_ask_object_type(master_form, obj_type));
+//	printf("=============type is %s\n", obj_type);
+//	CALL(AOM_ask_value_string(master_form, "user_data_1", &value));
+//	printf("ask property =%s!\n", value);
+//
+//	return ITK_ok;
+//}

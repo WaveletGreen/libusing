@@ -24,22 +24,10 @@
     <ClCompile Include="Item_get_owner_item.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="injectDll.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="libusing_custom_main.cxx">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="common.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="BOM_Check.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="FormMethond.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CUST_init_module.cpp">
@@ -51,15 +39,24 @@
     <ClCompile Include="..\..\..\..\Tencent Files\1243093366\FileRecv\WPM_Utility\WPM_Utility\string_utils.cxx">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="ActionHandlerManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RuleHandlerManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Injecter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="using.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="common.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="emp_bom_check_handler.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="error_handling.h">
@@ -74,9 +71,6 @@
     <ClInclude Include="init.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="BOM.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Debug.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -84,6 +78,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Tencent Files\1243093366\FileRecv\WPM_Utility\WPM_Utility\string_utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ActionHandlerManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RuleHandlerManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Injecter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

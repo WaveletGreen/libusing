@@ -201,27 +201,29 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Tencent Files\1243093366\FileRecv\WPM_Utility\WPM_Utility\ocilib.cxx" />
     <ClCompile Include="..\..\..\..\Tencent Files\1243093366\FileRecv\WPM_Utility\WPM_Utility\string_utils.cxx" />
-    <ClCompile Include="BOM_Check.cpp" />
+    <ClCompile Include="ActionHandlerManager.cpp" />
     <ClCompile Include="common.cpp" />
     <ClCompile Include="Debug.cpp" />
-    <ClCompile Include="FormMethond.cpp" />
     <ClCompile Include="CUST_init_module.cpp" />
-    <ClCompile Include="injectDll.cpp" />
+    <ClCompile Include="Injecter.cpp" />
     <ClCompile Include="Item_get_owner_item.cpp" />
     <ClCompile Include="libusing_custom_main.cxx" />
+    <ClCompile Include="MethodManager.cpp" />
+    <ClCompile Include="RuleHandlerManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Tencent Files\1243093366\FileRecv\WPM_Utility\WPM_Utility\ocilib.h" />
     <ClInclude Include="..\..\..\..\Tencent Files\1243093366\FileRecv\WPM_Utility\WPM_Utility\string_utils.h" />
-    <ClInclude Include="BOM.h" />
+    <ClInclude Include="ActionHandlerManager.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="Debug.h" />
-    <ClInclude Include="emp_bom_check_handler.h" />
     <ClInclude Include="epm_handler_common.h" />
     <ClInclude Include="error_handling.h" />
     <ClInclude Include="Form.h" />
     <ClInclude Include="init.h" />
-    <ClInclude Include="using.h" />
+    <ClInclude Include="Injecter.h" />
+    <ClInclude Include="MethodManager.h" />
+    <ClInclude Include="RuleHandlerManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Note.txt" />

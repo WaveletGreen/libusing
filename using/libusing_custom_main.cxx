@@ -1,8 +1,5 @@
-#include "using.h"
 #include "init.h"
 #include "Debug.h"
-#pragma warning (disable: 4819)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -18,10 +15,10 @@ extern "C" {
 			"USER_gs_shell_init_module",
 			(CUSTOM_EXIT_ftn_t)CUST_init_module);
 		if (ifail == 0) {
-			Debug("注册初始化CUST_init_module成功");
+			Debug("初始化CUST_init_module成功");
 		}
 		else {
-			Debug("注册初始化CUST_init_module失败");
+			Debug("初始化CUST_init_module失败");
 		}
 		return ifail;
 	}

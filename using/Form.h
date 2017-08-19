@@ -37,18 +37,9 @@
 #include <string.h>
 
 #include <string>
-#include <iostream>
 #include <iterator>
 #include <map>
 #include <vector>
 using namespace std;
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
-//	extern USER_EXT_DLL_API int Create_item_test(METHOD_message_t* msg, va_list args);
-//	extern int Register_revise_msg(void);
-//#ifdef __cplusplus
-//}
-//#endif
 #include <bmf/libuserext_undef.h>
 #endif 
