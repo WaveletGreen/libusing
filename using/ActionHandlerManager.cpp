@@ -1,13 +1,13 @@
 #include "Debug.h"
 #include "common.h"
 #include "error_handling.h"
-//struct item_revision
-//{
-//	char* itemName ;
-//	char* itemID ;
-//	char* revision_id;
-//	char*  user_id;
-//};
+struct item_revision
+{
+	char* itemName ;
+	char* itemID ;
+	char* revision_id;
+	char*  user_id;
+};
 extern int CycleBOM_ActionHandler(tag_t bomline, char *userid, char *status, vector<tag_t> &attach_vec, map< string, int > &errMap, logical debug)
 {
 	tag_t	child_item_tag = NULLTAG, child_rev_tag = NULLTAG, ebom_view = NULLTAG, ebom_bvr = NULLTAG,
@@ -35,6 +35,7 @@ extern int CycleBOM_ActionHandler(tag_t bomline, char *userid, char *status, vec
 			Debug("CycleBOM1__2");
 			ITKCALL(WSOM_ask_release_status_list(child_rev_tag, &status_count, &status_tag_list));
 			logical isInculde = false;
+
 			if (status_count > 0)
 			{
 				//测试
@@ -73,7 +74,6 @@ extern int CycleBOM_ActionHandler(tag_t bomline, char *userid, char *status, vec
 								ECHO("add new_child_rev");
 						}
 						DOFREE(last_status_tag_list);
-						
 					}
 				} //for
 			}
@@ -193,11 +193,11 @@ extern int HZ_attach_assembly(EPM_action_message_t msg)
 extern int CycleBOM_ActionHandler_Update(tag_t bomline, char *userid, char *status, vector<tag_t> &attach_vec, map< string, int > &errMap, logical debug)
 {
 	tag_t	child_item_tag = NULLTAG, child_rev_tag = NULLTAG, ebom_view = NULLTAG, ebom_bvr = NULLTAG,
-		*child_lines = NULL, *status_tag_list = NULL, last_rev = NULLTAG, owning_user = NULLTAG;
+		*child_lines = NULL, *status_tag_list = NULL, last_rev = NULLTAG, owning_user = NULLTAG, rev_rule_tag;
 	int ifail = ITK_ok, j = 0, itemrev_attr_id = 0, zuhao_attr_id = 0, child_cnt = 0, viewtype_attr_id = 0,
 		status_attr_id = 0, status_count = 0;
 	char  child_item_id[ITEM_id_size_c + 1] = "", *viewtype_value = NULL, *status_list = NULL,
-		child_rev_id[8] = "", user_id[33] = "";
+		child_rev_id[8] = "", user_id[33] = "", arg_status[128] = "";
 
 	ITKCALL(ifail = BOM_line_look_up_attribute(bomAttr_itemRevStatus, &status_attr_id));
 	ITKCALL(ifail = BOM_line_look_up_attribute(bomAttr_lineItemRevTag, &itemrev_attr_id));
@@ -208,17 +208,15 @@ extern int CycleBOM_ActionHandler_Update(tag_t bomline, char *userid, char *stat
 		//ITKCALL(ifail = BOM_line_ask_attribute_string(child_lines[k], status_attr_id, &status_list));
 		ITKCALL(ifail = BOM_line_ask_attribute_tag(child_lines[i], itemrev_attr_id, &child_rev_tag));
 		ITKCALL(AOM_ask_owner(child_rev_tag, &owning_user));
-
-		
 		ITKCALL(SA_ask_user_identifier(owning_user, user_id));
-
 		if (debug)
 			ECHO("process user_id is %s, object owner is %s\n", userid, user_id);
 		if (strcmp(userid, user_id) == 0)
 		{
 			//测试
-			Debug("CycleBOM1__2");
+			Debug("----------------------------");
 			ITKCALL(WSOM_ask_release_status_list(child_rev_tag, &status_count, &status_tag_list));
+			Debug(status_count);
 			logical isInculde = false;
 			if (status_count > 0)
 			{
@@ -227,6 +225,8 @@ extern int CycleBOM_ActionHandler_Update(tag_t bomline, char *userid, char *stat
 				for (int j = 0; j < status_count; j++)
 				{
 					char status_type[WSO_name_size_c + 1] = "";
+					int last_status_count = 0;
+
 					ITKCALL(CR_ask_release_status_type(status_tag_list[j], status_type));
 					//该版本已发布
 					if (debug)
@@ -234,22 +234,64 @@ extern int CycleBOM_ActionHandler_Update(tag_t bomline, char *userid, char *stat
 					//版本没有发布
 					if (stricmp(status_type, "TCM Released") == 0)
 					{
+						tag_t *last_status_tag_list = NULL, new_child_rev = NULLTAG;
 						Debug(child_rev_tag);
+
 						ITKCALL(ITEM_ask_item_of_rev(child_rev_tag, &child_item_tag));
-						/*	ITKCALL(ITEM_ask_latest_rev(child_item_tag, &last_rev));*/
-						
+						ITKCALL(ITEM_ask_latest_rev(child_item_tag, &last_rev));
+						ITKCALL(WSOM_ask_release_status_list(last_rev, &last_status_count, &last_status_tag_list));
+
 						char* itemName = NULL;
-						char* itemID=NULL;
+						char* itemID = NULL;
 						char* revision_id = NULL;
+						tag_t	ebom_view = NULLTAG, ebom_bvr = NULLTAG, ebom_window = NULLTAG, ebom_line = NULLTAG,
+							dbom_view = NULLTAG, dbom_bvr = NULLTAG;
+						if (last_status_count == 0)
+						{
+							ITEM_ask_id2(last_rev, &itemID);
+							ITEM_ask_rev_id2(last_rev, &revision_id);
+							ITEM_ask_rev_name2(last_rev, &itemName);
+
+						
+							ifail = getBomView(last_rev, BOM_VIEWTYPE, &ebom_view, &ebom_bvr, 1);
+							Debug(ifail);
+							if (ebom_view != NULLTAG)
+							{
+								//测试
+								Debug(">>>>13");
+								ITKCALL(BOM_create_window(&ebom_window));
+								if (rev_rule_tag != NULLTAG)
+									ITKCALL(BOM_set_window_config_rule(ebom_window, rev_rule_tag));
+								ITKCALL(BOM_set_window_top_line_bvr(ebom_window, ebom_bvr, &ebom_line));
+								CycleBOM_ActionHandler_Update(ebom_line, userid, arg_status, attach_vec, errMap, debug);
+								ITKCALL(BOM_close_window(ebom_window));
+							}
+						}
+						else
+						{
+							ITEM_ask_id2(child_item_tag, &itemID);
+							ITEM_ask_rev_id2(child_rev_tag, &revision_id);
+							ITEM_ask_rev_name2(child_rev_tag, &itemName);
+							Debug(">>>>13<<<<");
+							ifail = getBomView(last_rev, BOM_VIEWTYPE, &ebom_view, &ebom_bvr, 1);
+							if (ebom_view != NULLTAG)
+							{
+							ITKCALL(BOM_create_window(&ebom_window));
+							/*if (rev_rule_tag != NULLTAG)
+								ITKCALL(BOM_set_window_config_rule(ebom_window, rev_rule_tag));*/
+							ITKCALL(BOM_set_window_top_line_bvr(ebom_window, ebom_bvr, &ebom_line));
+							CycleBOM_ActionHandler_Update(ebom_line, userid, arg_status, attach_vec, errMap, debug);
+							ITKCALL(BOM_close_window(ebom_window));
+							}
+						}
+
 						Debug("到这里");
-						ITEM_ask_id2(child_item_tag,&itemID);
-						ITEM_ask_rev_id2(child_rev_tag, &revision_id);
-						ITEM_ask_rev_name2(child_rev_tag, &itemName);
-					/*	item_revision rev;
-						rev.itemID = itemID;
-						rev.itemName = itemName;
-						rev.revision_id = revision_id;
-						rev.user_id = user_id;*/
+
+						/*	item_revision rev;
+							rev.itemID = itemID;
+							rev.itemName = itemName;
+							rev.revision_id = revision_id;
+							rev.user_id = user_id;*/
 						Debug(itemID);
 						Debug("itemID");
 						Debug(itemName);
@@ -261,38 +303,57 @@ extern int CycleBOM_ActionHandler_Update(tag_t bomline, char *userid, char *stat
 						DOFREE(itemID);
 						DOFREE(itemName);
 						DOFREE(revision_id);
-						tag_t	ebom_view = NULLTAG, ebom_bvr = NULLTAG, ebom_window = NULLTAG, ebom_line = NULLTAG,
-							dbom_view = NULLTAG, dbom_bvr = NULLTAG, rev_rule_tag=NULLTAG;
-						char arg_status[128] = "";
-						ifail = getBomView(child_rev_tag, BOM_VIEWTYPE, &ebom_view, &ebom_bvr, 1);
+						//tag_t	ebom_view = NULLTAG, ebom_bvr = NULLTAG, ebom_window = NULLTAG, ebom_line = NULLTAG,
+						//	dbom_view = NULLTAG, dbom_bvr = NULLTAG, rev_rule_tag=NULLTAG;
+						//char arg_status[128] = "";
+						//ifail = getBomView(child_rev_tag, BOM_VIEWTYPE, &ebom_view, &ebom_bvr, 1);
 
-						if (ebom_view != NULLTAG)
-						{
-							//测试
-							Debug("13");
-							ITKCALL(BOM_create_window(&ebom_window));
-							if (rev_rule_tag != NULLTAG)
-								ITKCALL(BOM_set_window_config_rule(ebom_window, rev_rule_tag));
-							ITKCALL(BOM_set_window_top_line_bvr(ebom_window, ebom_bvr, &ebom_line));
-							CycleBOM_ActionHandler(ebom_line, userid, arg_status, attach_vec, errMap, debug);
-							ITKCALL(BOM_close_window(ebom_window));
-						}
+						//if (ebom_view != NULLTAG)
+						//{
+						//	//测试
+						//	Debug("13");
+						//	ITKCALL(BOM_create_window(&ebom_window));
+						//	if (rev_rule_tag != NULLTAG)
+						//		ITKCALL(BOM_set_window_config_rule(ebom_window, rev_rule_tag));
+						//	ITKCALL(BOM_set_window_top_line_bvr(ebom_window, ebom_bvr, &ebom_line));
+						//	CycleBOM_ActionHandler(ebom_line, userid, arg_status, attach_vec, errMap, debug);
+						//	ITKCALL(BOM_close_window(ebom_window));
+						//}
+						DOFREE(last_status_tag_list);
 					}
+
 				} //for
 			}
 			else
 			{
-				attach_vec.push_back(child_rev_tag);
-				if (debug)
-					ECHO("add self");
+				Debug(child_rev_tag);
+				ITKCALL(ITEM_ask_item_of_rev(child_rev_tag, &child_item_tag));
+				ITKCALL(ITEM_ask_latest_rev(child_item_tag, &last_rev));
+				char* itemName = NULL;
+				char* itemID = NULL;
+				char* revision_id = NULL;
+				ITEM_ask_id2(child_item_tag, &itemID);
+				ITEM_ask_rev_id2(child_rev_tag, &revision_id);
+				ITEM_ask_rev_name2(child_rev_tag, &itemName);
+				Debug(itemID);
+				Debug("itemID");
+				Debug(itemName);
+				Debug("itemName");
+				Debug(revision_id);
+				Debug("revision_id");
+				Debug(user_id);
+				Debug("版本已发布");
+				DOFREE(itemID);
+				DOFREE(itemName);
+				DOFREE(revision_id);
 			}
 			DOFREE(status_tag_list);
 		}
 	}
-	//for (int i = 0; i < child_cnt; i++)
-	//{
-	//	ifail = CycleBOM_ActionHandler(child_lines[i], userid, status, attach_vec, errMap, debug);
-	//}
+	for (int i = 0; i < child_cnt; i++)
+	{
+		ifail = CycleBOM_ActionHandler(child_lines[i], userid, status, attach_vec, errMap, debug);
+	}
 	return ifail;
 }
 extern int ActionHandler_Update(EPM_action_message_t msg)
@@ -375,10 +436,10 @@ extern int ActionHandler_Update(EPM_action_message_t msg)
 	if (debug)
 		ECHO("\nDEBUG:   attach_vec.size=%d\n", attach_vec.size());
 	attachment_types = EPM_target_attachment;
-	for (i = 0; i < attach_vec.size(); i++)
-	{
-		ITKCALL(EPM_add_attachments(rootTask_tag, 1, &(attach_vec[i]), &attachment_types));
-	}
+	//for (i = 0; i < attach_vec.size(); i++)
+	//{
+	//	ITKCALL(EPM_add_attachments(rootTask_tag, 1, &(attach_vec[i]), &attachment_types));
+	//}
 	if (debug)
 		ECHO("DEBUG:   errMap.size is %d\n", errMap.size());
 	//释放资源
