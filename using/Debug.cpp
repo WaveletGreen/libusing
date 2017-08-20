@@ -10,3 +10,6 @@ void Debug(int outMsg) {
 	if (ctrl == 1)
 	cout << "\n------²âÊÔ²ÎÊýÊÇ::" << outMsg << endl;
 }
+void Debug(string outMsg) {
+
+}

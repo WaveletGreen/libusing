@@ -3,10 +3,10 @@
 #include "error_handling.h"
 struct item_revision
 {
-	char* itemName ;
-	char* itemID ;
-	char* revision_id;
-	char*  user_id;
+	string itemName ;
+	string itemID ;
+	string revision_id;
+	string  user_id;
 };
 extern int CycleBOM_ActionHandler(tag_t bomline, char *userid, char *status, vector<tag_t> &attach_vec, map< string, int > &errMap, logical debug)
 {
@@ -273,6 +273,9 @@ extern int CycleBOM_ActionHandler_Update(tag_t bomline, char *userid, char *stat
 							ITEM_ask_rev_id2(child_rev_tag, &revision_id);
 							ITEM_ask_rev_name2(child_rev_tag, &itemName);
 							Debug(">>>>13<<<<");
+							string str(itemID);
+							str.append("/").append(string(revision_id)).append("/").append(string(itemName)).append ("/").append ( string(user_id));
+							errMap.insert(pair<string, int>(str, child_rev_tag));
 							ifail = getBomView(last_rev, BOM_VIEWTYPE, &ebom_view, &ebom_bvr, 1);
 							if (ebom_view != NULLTAG)
 							{
@@ -287,22 +290,21 @@ extern int CycleBOM_ActionHandler_Update(tag_t bomline, char *userid, char *stat
 
 						Debug("到这里");
 
-						/*	item_revision rev;
-							rev.itemID = itemID;
-							rev.itemName = itemName;
-							rev.revision_id = revision_id;
-							rev.user_id = user_id;*/
+						item_revision rev;
+						rev.itemID = itemID;
+						rev.itemName = itemName;
+						rev.revision_id = revision_id;
+						rev.user_id = user_id;
+						
 						Debug(itemID);
-						Debug("itemID");
 						Debug(itemName);
-						Debug("itemName");
 						Debug(revision_id);
-						Debug("revision_id");
 						Debug(user_id);
-						Debug("版本已发布");
 						DOFREE(itemID);
 						DOFREE(itemName);
 						DOFREE(revision_id);
+
+				
 						//tag_t	ebom_view = NULLTAG, ebom_bvr = NULLTAG, ebom_window = NULLTAG, ebom_line = NULLTAG,
 						//	dbom_view = NULLTAG, dbom_bvr = NULLTAG, rev_rule_tag=NULLTAG;
 						//char arg_status[128] = "";
@@ -336,13 +338,9 @@ extern int CycleBOM_ActionHandler_Update(tag_t bomline, char *userid, char *stat
 				ITEM_ask_rev_id2(child_rev_tag, &revision_id);
 				ITEM_ask_rev_name2(child_rev_tag, &itemName);
 				Debug(itemID);
-				Debug("itemID");
 				Debug(itemName);
-				Debug("itemName");
 				Debug(revision_id);
-				Debug("revision_id");
 				Debug(user_id);
-				Debug("版本已发布");
 				DOFREE(itemID);
 				DOFREE(itemName);
 				DOFREE(revision_id);
@@ -436,10 +434,11 @@ extern int ActionHandler_Update(EPM_action_message_t msg)
 	if (debug)
 		ECHO("\nDEBUG:   attach_vec.size=%d\n", attach_vec.size());
 	attachment_types = EPM_target_attachment;
-	//for (i = 0; i < attach_vec.size(); i++)
-	//{
-	//	ITKCALL(EPM_add_attachments(rootTask_tag, 1, &(attach_vec[i]), &attachment_types));
-	//}
+	map<string, int>::iterator err_it;
+	for (err_it = errMap.begin(); err_it != errMap.end(); err_it++)
+	{
+		ECHO("DEBUG:  err_it is %s\n", err_it->first.c_str());
+	}
 	if (debug)
 		ECHO("DEBUG:   errMap.size is %d\n", errMap.size());
 	//释放资源
