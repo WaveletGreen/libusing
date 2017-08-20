@@ -1,6 +1,13 @@
 #include "Debug.h"
 #include "common.h"
 #include "error_handling.h"
+//struct item_revision
+//{
+//	char* itemName ;
+//	char* itemID ;
+//	char* revision_id;
+//	char*  user_id;
+//};
 extern int CycleBOM_ActionHandler(tag_t bomline, char *userid, char *status, vector<tag_t> &attach_vec, map< string, int > &errMap, logical debug)
 {
 	tag_t	child_item_tag = NULLTAG, child_rev_tag = NULLTAG, ebom_view = NULLTAG, ebom_bvr = NULLTAG,
@@ -15,7 +22,7 @@ extern int CycleBOM_ActionHandler(tag_t bomline, char *userid, char *status, vec
 	ITKCALL(ifail = BOM_line_ask_child_lines(bomline, &child_cnt, &child_lines));
 	for (int i = 0; i < child_cnt; i++)
 	{//测试
-		Debug("CycleBOM1__1");
+		Debug(child_cnt);
 		//ITKCALL(ifail = BOM_line_ask_attribute_string(child_lines[k], status_attr_id, &status_list));
 		ITKCALL(ifail = BOM_line_ask_attribute_tag(child_lines[i], itemrev_attr_id, &child_rev_tag));
 		ITKCALL(AOM_ask_owner(child_rev_tag, &owning_user));
@@ -143,7 +150,9 @@ extern int HZ_attach_assembly(EPM_action_message_t msg)
 			Debug("12");
 			rev_tag = attachments[i];
 			ITKCALL(ITEM_ask_item_of_rev(rev_tag, &item_tag));
+			Debug(item_tag);
 			ITKCALL(ITEM_ask_id(item_tag, item_id));
+			Debug(item_id);
 			tag_t	ebom_view = NULLTAG, ebom_bvr = NULLTAG, ebom_window = NULLTAG, ebom_line = NULLTAG,
 				dbom_view = NULLTAG, dbom_bvr = NULLTAG;
 			ifail = getBomView(rev_tag, BOM_VIEWTYPE, &ebom_view, &ebom_bvr, 1);
@@ -225,22 +234,49 @@ extern int CycleBOM_ActionHandler_Update(tag_t bomline, char *userid, char *stat
 					//版本没有发布
 					if (stricmp(status_type, "TCM Released") == 0)
 					{
-						////测试
-						//Debug("CycleBOM1__4");
-						//int last_status_count = 0;
-						//tag_t *last_status_tag_list = NULL, new_child_rev = NULLTAG;
 						Debug(child_rev_tag);
 						ITKCALL(ITEM_ask_item_of_rev(child_rev_tag, &child_item_tag));
-						ITKCALL(ITEM_ask_latest_rev(child_item_tag, &last_rev));
+						/*	ITKCALL(ITEM_ask_latest_rev(child_item_tag, &last_rev));*/
+						
 						char* itemName = NULL;
 						char* itemID=NULL;
+						char* revision_id = NULL;
 						Debug("到这里");
-						ITEM_ask_rev_id(child_item_tag, itemID);
-						ITEM_ask_rev_name(child_item_tag, itemName);
-						Debug(user_id);
-						Debug(itemName);
+						ITEM_ask_id2(child_item_tag,&itemID);
+						ITEM_ask_rev_id2(child_rev_tag, &revision_id);
+						ITEM_ask_rev_name2(child_rev_tag, &itemName);
+					/*	item_revision rev;
+						rev.itemID = itemID;
+						rev.itemName = itemName;
+						rev.revision_id = revision_id;
+						rev.user_id = user_id;*/
 						Debug(itemID);
+						Debug("itemID");
+						Debug(itemName);
+						Debug("itemName");
+						Debug(revision_id);
+						Debug("revision_id");
+						Debug(user_id);
 						Debug("版本已发布");
+						DOFREE(itemID);
+						DOFREE(itemName);
+						DOFREE(revision_id);
+						tag_t	ebom_view = NULLTAG, ebom_bvr = NULLTAG, ebom_window = NULLTAG, ebom_line = NULLTAG,
+							dbom_view = NULLTAG, dbom_bvr = NULLTAG, rev_rule_tag=NULLTAG;
+						char arg_status[128] = "";
+						ifail = getBomView(child_rev_tag, BOM_VIEWTYPE, &ebom_view, &ebom_bvr, 1);
+
+						if (ebom_view != NULLTAG)
+						{
+							//测试
+							Debug("13");
+							ITKCALL(BOM_create_window(&ebom_window));
+							if (rev_rule_tag != NULLTAG)
+								ITKCALL(BOM_set_window_config_rule(ebom_window, rev_rule_tag));
+							ITKCALL(BOM_set_window_top_line_bvr(ebom_window, ebom_bvr, &ebom_line));
+							CycleBOM_ActionHandler(ebom_line, userid, arg_status, attach_vec, errMap, debug);
+							ITKCALL(BOM_close_window(ebom_window));
+						}
 					}
 				} //for
 			}
@@ -253,10 +289,10 @@ extern int CycleBOM_ActionHandler_Update(tag_t bomline, char *userid, char *stat
 			DOFREE(status_tag_list);
 		}
 	}
-	for (int i = 0; i < child_cnt; i++)
-	{
-		ifail = CycleBOM_ActionHandler(child_lines[i], userid, status, attach_vec, errMap, debug);
-	}
+	//for (int i = 0; i < child_cnt; i++)
+	//{
+	//	ifail = CycleBOM_ActionHandler(child_lines[i], userid, status, attach_vec, errMap, debug);
+	//}
 	return ifail;
 }
 extern int ActionHandler_Update(EPM_action_message_t msg)
@@ -300,6 +336,7 @@ extern int ActionHandler_Update(EPM_action_message_t msg)
 	ECHO("userid:%s\n", userid);
 	//获得所有目标对象
 	ITKCALL(ifail = EPM_ask_attachments(rootTask_tag, EPM_target_attachment, &att_cnt, &attachments));
+	Debug(rootTask_tag);
 	if (debug)
 		ECHO("DEBUG:   find %d target\n", att_cnt);
 	for (i = 0; i < att_cnt; i++)
